@@ -1,58 +1,45 @@
-var Knight = function(config, board) {
+var Knight = function(config){
     this.type = 'knight';
-    this.board = board; 
     this.constructor(config);
 };
 
+
 Knight.prototype = new Piece({});
 
-Knight.prototype.isValidMove = function(targetPosition) {
-    let currentCol = this.position.charCodeAt(0) - 65; 
-    let currentRow = parseInt(this.position.charAt(1)) - 1;
-    let targetCol = targetPosition.col.charCodeAt(0) - 65;
-    let targetRow = parseInt(targetPosition.row) - 1;
 
-    let colDiff = Math.abs(targetCol - currentCol);
-    let rowDiff = Math.abs(targetRow - currentRow);
+Knight.prototype.isValidPosition = function(targetPosition,board){
+    let currentCol = this.position[0];
+    let currentRow = parseInt(this.position[1]);
 
-    if (!((colDiff === 2 && rowDiff === 1) || (colDiff === 1 && rowDiff === 2))) {
-        console.warn("Invalid move for knight: not an L-shape");
-        return false;
-    }
+    let targetCol = targetPosition.col;
+    let targetRow = parseInt(targetPosition.row);
 
-    let pieceAtTarget = this.board.getPieceAt(targetPosition);
-    if (pieceAtTarget) {
-        if (pieceAtTarget.color === this.color) {
-            console.warn("Invalid move for knight: cannot capture own piece");
-            return false;
-        } else {
-            return 'capture'; 
-        }
-    }
-    return true;
-};
+    let rowDiff = Math.abs(currentRow - targetRow);
+    let colDiff = Math.abs(currentCol.charCodeAt(0) - targetCol.charCodeAt(0));
 
-Knight.prototype.move = function(newPosition) {
-    const result = this.isValidMove(newPosition);
-    if (result === true) {
-        this.position = newPosition.col + newPosition.row;
-        this.render();
-        return true;
-    } else if (result === 'capture') {
-        let pieceToCapture = this.board.getPieceAt(newPosition);
-        if (pieceToCapture) {
-            pieceToCapture.kill();
-        }
-        this.position = newPosition.col + newPosition.row;
-        this.render();
+
+   if((rowDiff === 2 && colDiff === 1 || rowDiff === 1 && colDiff === 2) && (targetCol>='A' && targetCol<='H') && (targetRow>='1' && targetRow<='8')) {
         return true;
     }
+
+    console.warn("Invalid move for Knight");
     return false;
+
 };
 
-Knight.prototype.kill = function() {
-    if (this.$el && this.$el.parentNode) {
-        this.$el.parentNode.removeChild(this.$el);
+Knight.prototype.moveTo = function(targetPosition, board){    
+    if(this.isValidPosition(targetPosition, board)){
+
+        
+        this.position = targetPosition.col + targetPosition.row;
+        this.render();
+        return true
+    }else{
+        if(board.turn==="white"){
+            board.turn="black";
+        }else{
+            board.turn="white";
+        }
+        return false
     }
-    this.position = null;
-};
+}
